@@ -1,13 +1,6 @@
----
-layout: page
-title: Collections
-permalink: /collection/
-icon: bookmark
-type: page
----
-
-* content
-{:toc}
+I"='<ul id="markdown-toc">
+  <li><a href="#comments" id="markdown-toc-comments">Comments</a></li>
+</ul>
 
 <!-- ## 工具
 
@@ -220,7 +213,8 @@ Syntax Theme: Atom Dark or One Dark
 
     折叠左侧目录章节。 -->
 
-    <!-- ![](http://ww4.sinaimg.cn/large/7011d6cfjw1f08kmplbj1j20gn05l0tk.jpg) -->
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;!-- ![](http://ww4.sinaimg.cn/large/7011d6cfjw1f08kmplbj1j20gn05l0tk.jpg) --&gt;
+</code></pre></div></div>
 
 <!-- ## Chrome 插件
 - [Octotree](https://chrome.google.com/webstore/detail/octotree/bkhaagjahfmjljalopjnoealnfndnagc)
@@ -290,6 +284,6 @@ Syntax Theme: Atom Dark or One Dark
 
     首页的卡片翻动效果非常赞。 -->
 
-## Comments
+<h2 id="comments">Comments</h2>
 
-{% include comments.html %}
+:ET
