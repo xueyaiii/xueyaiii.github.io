@@ -2,7 +2,7 @@
 layout: post
 title: VSCode使用Git
 date: 2019-10-4
-catalories: 工具
+catagories: 工具
 tags: Git VSCode插件安装
 author: xueyaiii
 ---
