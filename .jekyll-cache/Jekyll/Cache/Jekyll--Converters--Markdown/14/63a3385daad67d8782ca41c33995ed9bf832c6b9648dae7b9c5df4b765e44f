@@ -1,0 +1,27 @@
+I"i
+<h1 id="从远程克隆代码到本地电脑">从远程克隆代码到本地电脑</h1>
+
+<ul>
+  <li>输入<code class="highlighter-rouge">ctrl + shift + p</code> 打开命令面板，输入<code class="highlighter-rouge">Git clone</code>,回车，输入仓库地址</li>
+  <li>安装<code class="highlighter-rouge">Git history</code>插件，用来查看整个仓库文件提交历史和修改情况</li>
+</ul>
+
+<h1 id="将修改的库提交到远程">将修改的库提交到远程</h1>
+
+<h3 id="查看修改进行提交">查看修改，进行提交</h3>
+
+<ul>
+  <li><code class="highlighter-rouge">Ctrl + shift + G</code> 代开代码管理工具,看修改了多少文件</li>
+  <li>在代码管理窗口，点击<code class="highlighter-rouge">+</code>，将所有文件提交到暂存区</li>
+  <li>打开<code class="highlighter-rouge">···</code>，选择：提交已暂存的 ( Commit Staged )，输入消息，按<code class="highlighter-rouge">ctrl + enter</code>提交</li>
+  <li>最后将所有代码push到云端，输入账号密码</li>
+</ul>
+
+<h3 id="解决总是输入用户名和密码">解决总是输入用户名和密码</h3>
+
+<ul>
+  <li>打开终端，会看到cmd定位在我们仓库位置，我们只要添加：<code class="highlighter-rouge">git config --global credential.helper store</code></li>
+  <li>退出vscode并重启，进行git操作</li>
+</ul>
+
+:ET
