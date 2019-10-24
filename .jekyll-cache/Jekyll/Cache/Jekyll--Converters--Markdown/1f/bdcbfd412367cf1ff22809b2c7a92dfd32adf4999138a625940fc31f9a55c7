@@ -1,0 +1,222 @@
+I"a^<h1 id="knn">KNN</h1>
+
+<h2 id="knn原理">KNN原理</h2>
+
+<ol>
+  <li>假设有一个带有标签的样本数据集（训练样本集），其中包含每条数据与所属分类的对应关系。</li>
+  <li>输入没有标签的新数据后，将新数据的每个特征与<strong>样本集中数据</strong>对应的特征进行比较。
+    <ul>
+      <li>计算新数据与样本数据集中每条数据的距离。</li>
+      <li>对求得的所有距离进行排序（从小到大，越小表示越相似）。</li>
+      <li>取前 k （k 一般小于等于 20 ）个样本数据对应的分类标签。</li>
+    </ul>
+  </li>
+  <li>求 k 个数据中出现次数最多的分类标签作为新数据的分类。</li>
+</ol>
+
+<h2 id="knn实例">KNN实例</h2>
+
+<p>海伦使用约会网站寻找约会对象。经过一段时间之后，她发现曾交往过三种类型的人:</p>
+
+<p>不喜欢的人
+魅力一般的人
+极具魅力的人</p>
+
+<p>她希望：</p>
+
+<p>工作日与魅力一般的人约会
+周末与极具魅力的人约会
+不喜欢的人则直接排除掉</p>
+
+<h2 id="knn算法一般流程">KNN算法一般流程</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>收集数据：提供文本文件
+准备数据：使用 Python 解析文本文件
+分析数据：使用 Matplotlib 画二维散点图
+训练算法：此步骤不适用于 k-近邻算法
+测试算法：使用海伦提供的部分数据作为测试样本。
+        测试样本和非测试样本的区别在于：
+            测试样本是已经完成分类的数据，如果预测分类与实际类别不同，则标记为一个错误。
+使用算法：产生简单的命令行程序，然后海伦可以输入一些特征数据以判断对方是否为自己喜欢的类型。
+</code></pre></div></div>
+<h2 id="完整代码">完整代码</h2>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#收集数据，将文本记录转换为 NumPy 的解析程序
+</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="k">def</span> <span class="nf">file2matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+   <span class="s">"""
+   Desc:
+       导入训练数据
+   parameters:
+       filename: 数据文件路径
+   return: 
+       数据矩阵 returnMat 和对应的类别 classLabelVector
+   """</span>
+   <span class="n">fr</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+   <span class="c1"># 获得文件中的数据行的行数
+</span>   <span class="n">numberOfLines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fr</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>
+   <span class="c1"># 生成对应的空矩阵
+</span>   <span class="c1"># 例如：zeros(2，3)就是生成一个 2*3的矩阵，各个位置上全是 0 
+</span>   <span class="n">returnMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfLines</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>  <span class="c1"># prepare matrix to return
+</span>   <span class="n">classLabelVector</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># prepare labels return
+</span>   <span class="n">fr</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+   <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+   <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fr</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+       <span class="c1"># str.strip([chars]) --返回已移除字符串头尾指定字符所生成的新字符串
+</span>       <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+       <span class="c1"># 以 '\t' 切割字符串
+</span>       <span class="n">listFromLine</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">'</span><span class="se">\t</span><span class="s">'</span><span class="p">)</span>
+       <span class="c1"># 每列的属性数据
+</span>       <span class="n">returnMat</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">listFromLine</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+       <span class="c1"># 每列的类别数据，就是 label 标签数据
+</span>       <span class="n">classLabelVector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">listFromLine</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+       <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+   <span class="c1"># 返回数据矩阵returnMat和对应的类别classLabelVector
+</span>   <span class="k">return</span> <span class="n">returnMat</span><span class="p">,</span> <span class="n">classLabelVector</span>
+
+
+<span class="c1">#分析数据：使用 Matplotlib 画二维散点图
+#from matplotlib import pyplot as plt
+</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="k">def</span> <span class="nf">showdatas</span><span class="p">(</span><span class="n">datingDataMat</span><span class="p">,</span><span class="n">datingLabels</span><span class="p">):</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">datingDataMat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">datingDataMat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">15.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">datingLabels</span><span class="p">),</span> <span class="mf">15.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">datingLabels</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">#数据归一化处理
+</span><span class="k">def</span> <span class="nf">autoNorm</span><span class="p">(</span><span class="n">dataSet</span><span class="p">):</span>
+    <span class="s">"""
+    Desc:
+        归一化特征值，消除特征之间量级不同导致的影响
+    parameter:
+        dataSet: 数据集
+    return:
+        归一化后的数据集 normDataSet. ranges和minVals即最小值与范围，并没有用到
+
+    归一化公式：
+        Y = (X-Xmin)/(Xmax-Xmin)
+        其中的 min 和 max 分别是数据集中的最小特征值和最大特征值。该函数可以自动将数字特征值转化为0到1的区间。
+    """</span>
+    <span class="c1"># 计算每种属性的最大值、最小值、范围
+</span>    <span class="n">minVals</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="nb">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">maxVals</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># 极差
+</span>    <span class="n">ranges</span> <span class="o">=</span> <span class="n">maxVals</span> <span class="o">-</span> <span class="n">minVals</span>
+    <span class="c1">#shape(dataSet)返回dataSet的矩阵行列数
+</span>    <span class="n">normDataSet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">dataSet</span><span class="p">))</span>
+    <span class="c1">#返回dataSet的行数
+</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># 生成与最小值之差组成的矩阵
+</span>    <span class="n">normDataSet</span> <span class="o">=</span> <span class="n">dataSet</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">minVals</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># 将最小值之差除以范围组成矩阵
+</span>    <span class="n">normDataSet</span> <span class="o">=</span> <span class="n">normDataSet</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># element wise divide
+</span>    <span class="k">return</span> <span class="n">normDataSet</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="n">minVals</span>
+
+<span class="c1">#训练算法：此步骤不适用于 k-近邻算法
+#由于测试数据每一次都要与全量的训练数据进行比较
+</span>
+<span class="c1">#测试算法
+</span><span class="kn">import</span> <span class="nn">operator</span>
+<span class="k">def</span> <span class="nf">classify0</span><span class="p">(</span><span class="n">inX</span><span class="p">,</span> <span class="n">dataSet</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="n">dataSetSize</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1">#距离度量 度量公式为欧氏距离
+</span>    <span class="n">diffMat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">inX</span><span class="p">,</span> <span class="p">(</span><span class="n">dataSetSize</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">dataSet</span>
+    <span class="n">sqDiffMat</span> <span class="o">=</span> <span class="n">diffMat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">sqDistances</span> <span class="o">=</span> <span class="n">sqDiffMat</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">sqDistances</span><span class="o">**</span><span class="mf">0.5</span>
+    
+    <span class="c1">#将距离排序：从小到大
+</span>    <span class="n">sortedDistIndicies</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+    <span class="c1">#选取前K个最短距离， 选取这K个中最多的分类类别
+</span>    <span class="n">classCount</span><span class="o">=</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">voteIlabel</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="n">sortedDistIndicies</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">classCount</span><span class="p">[</span><span class="n">voteIlabel</span><span class="p">]</span> <span class="o">=</span> <span class="n">classCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">voteIlabel</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> 
+    <span class="n">sortedClassCount</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">classCount</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sortedClassCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+ 
+<span class="k">def</span> <span class="nf">datingClassTest</span><span class="p">():</span>
+    <span class="s">"""
+    Desc:
+        对约会网站的测试方法
+    parameters:
+        none
+    return:
+        错误数
+    """</span>
+    <span class="c1"># 设置测试数据的的一个比例（训练数据集比例=1-hoRatio）
+</span>    <span class="n">hoRatio</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># 测试范围,一部分测试一部分作为样本
+</span>    <span class="c1"># 从文件中加载数据
+</span>    <span class="n">datingDataMat</span><span class="p">,</span> <span class="n">datingLabels</span> <span class="o">=</span> <span class="n">file2matrix</span><span class="p">(</span><span class="s">'datingTestSet.txt'</span><span class="p">)</span>  <span class="c1"># load data setfrom file
+</span>    <span class="c1"># 归一化数据
+</span>    <span class="n">normMat</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="n">minVals</span> <span class="o">=</span> <span class="n">autoNorm</span><span class="p">(</span><span class="n">datingDataMat</span><span class="p">)</span>
+    <span class="c1"># m 表示数据的行数，即矩阵的第一维
+</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">normMat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># 设置测试的样本数量， numTestVecs:m表示训练样本的数量
+</span>    <span class="n">numTestVecs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">hoRatio</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'numTestVecs='</span><span class="p">,</span> <span class="n">numTestVecs</span><span class="p">)</span>
+    <span class="n">errorCount</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numTestVecs</span><span class="p">):</span>
+        <span class="c1"># 对数据测试
+</span>        <span class="n">classifierResult</span> <span class="o">=</span> <span class="n">classify0</span><span class="p">(</span><span class="n">normMat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">normMat</span><span class="p">[</span><span class="n">numTestVecs</span><span class="p">:</span><span class="n">m</span><span class="p">,</span> <span class="p">:],</span> <span class="n">datingLabels</span><span class="p">[</span><span class="n">numTestVecs</span><span class="p">:</span><span class="n">m</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"the classifier came back with: </span><span class="si">%</span><span class="s">d, the real answer is: </span><span class="si">%</span><span class="s">d"</span> <span class="o">%</span> <span class="p">(</span><span class="n">classifierResult</span><span class="p">,</span> <span class="n">datingLabels</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">classifierResult</span> <span class="o">!=</span> <span class="n">datingLabels</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span> <span class="n">errorCount</span> <span class="o">+=</span> <span class="mf">1.0</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"the total error rate is: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="p">(</span><span class="n">errorCount</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">numTestVecs</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">errorCount</span><span class="p">)</span>
+
+<span class="c1">#使用算法，进行预测
+</span><span class="k">def</span> <span class="nf">classifyPerson</span><span class="p">():</span>
+    <span class="c1">#输出结果
+</span>    <span class="n">resultList</span> <span class="o">=</span> <span class="p">[</span><span class="s">'不喜欢'</span><span class="p">,</span><span class="s">'有些喜欢'</span><span class="p">,</span><span class="s">'非常喜欢'</span><span class="p">]</span>
+    <span class="c1">#三维特征用户输入
+</span>    <span class="n">ffMiles</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s">"每年获得的飞行常客里程数:"</span><span class="p">))</span>
+    <span class="n">precentTats</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s">"玩视频游戏所耗时间百分比:"</span><span class="p">))</span>
+    <span class="n">iceCream</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s">"每周消费的冰激淋公升数:"</span><span class="p">))</span>
+    <span class="c1">#打开的文件名
+</span>    <span class="n">filename</span> <span class="o">=</span> <span class="s">"datingTestSet.txt"</span>
+    <span class="c1">#打开并处理数 据
+</span>    <span class="n">datingDataMat</span><span class="p">,</span> <span class="n">datingLabels</span> <span class="o">=</span> <span class="n">file2matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="c1">#训练集归一化
+</span>    <span class="n">normMat</span><span class="p">,</span> <span class="n">ranges</span><span class="p">,</span> <span class="n">minVals</span> <span class="o">=</span> <span class="n">autoNorm</span><span class="p">(</span><span class="n">datingDataMat</span><span class="p">)</span>
+    <span class="c1">#生成NumPy数组,测试集
+</span>    <span class="n">inArr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ffMiles</span><span class="p">,</span><span class="n">precentTats</span><span class="p">,</span> <span class="n">iceCream</span><span class="p">])</span>
+    <span class="c1">#测试集归一化
+</span>    <span class="n">norminArr</span> <span class="o">=</span> <span class="p">(</span><span class="n">inArr</span> <span class="o">-</span> <span class="n">minVals</span><span class="p">)</span> <span class="o">/</span> <span class="n">ranges</span>
+    <span class="c1">#返回分类结果
+</span>    <span class="n">classifierResult</span> <span class="o">=</span> <span class="n">classify0</span><span class="p">(</span><span class="n">norminArr</span><span class="p">,</span> <span class="n">normMat</span><span class="p">,</span> <span class="n">datingLabels</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="c1">#打印结果
+</span>    <span class="k">print</span><span class="p">(</span><span class="s">"你可能</span><span class="si">%</span><span class="s">s这个人"</span> <span class="o">%</span> <span class="p">(</span><span class="n">resultList</span><span class="p">[</span><span class="n">classifierResult</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="c1">#打开的文件名
+</span>    <span class="n">filename</span> <span class="o">=</span> <span class="s">"datingTestSet.txt"</span>
+    <span class="c1">#打开并处理数据
+</span>    <span class="n">datingDataMat</span><span class="p">,</span> <span class="n">datingLabels</span> <span class="o">=</span> <span class="n">file2matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="c1">#数据可视化
+</span>    <span class="n">showdatas</span><span class="p">(</span><span class="n">datingDataMat</span><span class="p">,</span> <span class="n">datingLabels</span><span class="p">)</span>
+    <span class="c1">#验证分类器
+</span>    <span class="n">datingClassTest</span><span class="p">()</span>
+    <span class="c1">#使用分类器
+</span>    <span class="n">classifyPerson</span><span class="p">()</span>
+
+</code></pre></div></div>
+<h2 id="理解归一化">理解归一化</h2>
+<h4 id="归一化定义">归一化定义</h4>
+<ul>
+  <li>归一化是为了让权重变统一</li>
+  <li>与标准化的区别
+    <ul>
+      <li>归一化：对不同特征维度的伸缩变换，使各个特征维度对目标函数的影响权重一致，改变了原始数据的分布，加快了模型求解的收敛速度</li>
+      <li>标准化：对不同特征维度的伸缩变换的目的是使得不同度量之间的特征具有可比性。同时不改变原始数据的分布。</li>
+    </ul>
+  </li>
+</ul>
+
+<p><a href="https://www.zhihu.com/question/20467170">参考链接</a></p>
+<h4 id="归一化常用方法">归一化常用方法</h4>
+<ol>
+  <li>线性函数转换
+$y=(x-\text { MinValue) } /( \text { Max Value-MinValue) }$</li>
+  <li>对数函数转换
+$y=\log_{10}(x)$</li>
+</ol>
+:ET
