@@ -1,0 +1,180 @@
+I"�E<head>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+            inlineMath: [['$','$']]
+            }
+        });
+    </script>
+</head>
+
+<h2 id="用sklearn实现pca主成分分析">用sklearn实现PCA(主成分分析)</h2>
+<h3 id="pca">PCA</h3>
+<ul>
+  <li>无监督数据降维技术</li>
+  <li>一种<strong>特征抽取</strong>算法</li>
+</ul>
+
+<h4 id="特征抽取与特征选择">特征抽取与特征选择</h4>
+<ul>
+  <li>目的均为减少特征数据集的属性（特征）的数目</li>
+  <li>特征选择：去掉无关特征，保留相关特征，未改变原来特征空间</li>
+  <li>特征抽取：将机器学习算法不能识别的原始数据转化为算法可以识别的特征的过程，改变了原来的特征空间</li>
+</ul>
+
+<h4 id="pca工作原理">PCA工作原理</h4>
+<ol>
+  <li>找出第一个主成分的方向，也就是数据<strong>方差最大</strong>的方向。</li>
+  <li>找出第二个主成分的方向，也就是数据<strong>方差次大</strong>的方向，并且该方向与第一个主成分方向正交(orthogonal 如果是二维空间就叫垂直)</li>
+  <li>通过这种方式计算出所有的主成分方向。</li>
+  <li>通过数据集的协方差矩阵及其特征值分析，可以得到这些主成分的值。</li>
+  <li>一旦得到了协方差矩阵的特征值和特征向量，我们就可以保留最大的 N 个特征。这些特征向量也给出了 N 个最重要特征的真实结构，我们就可以通过将数据乘上这 N 个特征向量 从而将它转换到新的空间上。</li>
+</ol>
+
+<h4 id="pca算法流程">PCA算法流程</h4>
+<ul>
+  <li>对原始$d$维数据集做标准化处理。</li>
+  <li>构造样本的协方差矩阵。(后面进行对角化)</li>
+  <li>计算协方差矩阵的特征值和相应的特征向量。</li>
+  <li>选择与前$k$个最大特征值对应的特征向量，其中$k$为新特征空间的维度$（\mathrm{k} \leq \mathrm{d})$。</li>
+  <li>通过前$k$个特征向量构建映射矩阵$W$</li>
+  <li>通过映射矩阵$W$将$d$维的输入数据集$X$转换到新的$k$维特征子空间。</li>
+</ul>
+
+<h4 id="实现pca">实现PCA</h4>
+<p><strong>数据预处理</strong></p>
+
+<p>特征标准化</p>
+
+<p>$x_{j}^{(i)}=\frac{x_{j}^{(i)}-\mu_{j}}{s_{j}}$，$\mu_{j}$为特征$j$的均值，$s_{j}$为特征$j$的标准差</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#数据预处理
+</span>    <span class="c1">#加载数据集
+</span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="n">df_wine</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'https://archive.ics.uci.edu/ml/'</span>
+                      <span class="s">'machine-learning-databases/wine/wine.data'</span><span class="p">,</span>
+                      <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="c1">#将数据集分成训练集和测试集
+</span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">df_wine</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">df_wine</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+    <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> 
+                     <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                     <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1">#使用单位方差标准化数据集
+</span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">X_train_std</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">X_test_std</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</code></pre></div></div>
+<p><strong>构造协方差矩阵 获得协方差矩阵的特征值和特征向量</strong></p>
+
+<p>协方差矩阵的特征向量代表主成分（最大方差方向），而对应的特征值大小就决定了特征向量的重要性</p>
+
+<p>计算协方差</p>
+
+<p>$\sigma_{j k}=\frac{1}{n} \sum_{i=1}^{n}\left(x_{j}^{(i)}-\mu_{j}\right)\left(x_{k}^{(i)}-\mu_{k}\right)$，$\mu_{j}$和$\mu_{k}$分别为特征$j$和$k$的均值</p>
+
+<p>协方差矩阵</p>
+
+<p>$V=\left(\begin{array}{cccc}{\sigma_{11}} &amp; {\sigma_{12}} &amp; {\cdots} &amp; {\sigma_{1 n}} \ {\sigma_{21}} &amp; {\sigma_{22}} &amp; {\cdots} &amp; {\sigma_{2 n}} \ {\vdots} &amp; {\vdots} &amp; {} &amp; {\vdots} \ {\sigma_{n 1}} &amp; {\sigma_{n 2}} &amp; {\cdots} &amp; {\sigma_{n n}}\end{array}\right)$</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#构造协方差矩阵 获得协方差矩阵的特征值和特征向量
+</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="n">cov_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X_train_std</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">eigen_vals</span><span class="p">,</span> <span class="n">eigen_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">cov_mat</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">Eigenvalues </span><span class="se">\n</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">eigen_vals</span><span class="p">)</span>
+</code></pre></div></div>
+<p><strong>选择与前$k$个最大特征值对应的特征向量</strong></p>
+
+<p>绘制方差贡献率图像</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tot</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">eigen_vals</span><span class="p">)</span>
+<span class="n">var_exp</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span> <span class="o">/</span> <span class="n">tot</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">eigen_vals</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)]</span>
+<span class="n">cum_var_exp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">var_exp</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> <span class="n">var_exp</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s">'center'</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s">'individual explained variance'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> <span class="n">cum_var_exp</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="s">'mid'</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s">'cumulative explained variance'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Explained variance ratio'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Principal component index'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">'best'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="c1"># plt.savefig('images/05_02.png', dpi=300)
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+<p><strong>特征值降序排列</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#按降序排列特征值
+# Make a list of (eigenvalue, eigenvector) tuples
+</span><span class="n">eigen_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">eigen_vals</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">eigen_vecs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eigen_vals</span><span class="p">))]</span>
+
+<span class="c1"># Sort the (eigenvalue, eigenvector) tuples from high to low
+</span><span class="n">eigen_pairs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c1">#选两个对应的特征值最大的特征向量
+</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">eigen_pairs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+               <span class="n">eigen_pairs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Matrix W:</span><span class="se">\n</span><span class="s">'</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+</code></pre></div></div>
+<p><strong>通过前$k$个特征向量构建映射矩阵$W$</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X_train_std</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+</code></pre></div></div>
+<p><strong>通过映射矩阵$W$将$d$维的输入数据集$X$转换到新的$k$维特征子空间</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X_train_pca</span> <span class="o">=</span> <span class="n">X_train_std</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">'r'</span><span class="p">,</span> <span class="s">'b'</span><span class="p">,</span> <span class="s">'g'</span><span class="p">]</span>
+<span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s">'s'</span><span class="p">,</span> <span class="s">'x'</span><span class="p">,</span> <span class="s">'o'</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y_train</span><span class="p">),</span> <span class="n">colors</span><span class="p">,</span> <span class="n">markers</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train_pca</span><span class="p">[</span><span class="n">y_train</span> <span class="o">==</span> <span class="n">l</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> 
+                <span class="n">X_train_pca</span><span class="p">[</span><span class="n">y_train</span> <span class="o">==</span> <span class="n">l</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'PC 1'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'PC 2'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">'lower left'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="c1"># plt.savefig('images/05_03.png', dpi=300)
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="用sklearn实现pca">用sklearn实现PCA</h3>
+<h4 id="步骤">步骤</h4>
+<ul>
+  <li>对数据进行预处理
+    <ul>
+      <li>加载数据集（使用自带葡萄酒数据）</li>
+      <li>将数据集分成训练集和测试集</li>
+      <li>使用单位方差标准化数据集</li>
+      <li>使用PCA进行特征抽取
+  本例将训练数据转换到两个主成分轴生成的决策区域</li>
+    </ul>
+  </li>
+  <li>逻辑斯蒂回归对数据进行分类</li>
+  <li>对测试数据进行预测</li>
+  <li>使用plot_decision_region进行可视化展示
+    <h4 id="运行环境">运行环境</h4>
+    <p>Windows10 + anaconda3 Spyder + python3</p>
+    <h4 id="运行结果">运行结果</h4>
+  </li>
+  <li>训练集</li>
+  <li>
+    <p><img src="/image/PCA_sklearn1.PNG" alt="训练集" /></p>
+  </li>
+  <li>
+    <p>测试集</p>
+  </li>
+  <li><img src="/image/PCA_sklearn2.PNG" alt="测试集" /></li>
+</ul>
+:ET
