@@ -27,7 +27,8 @@ author: xueyaiii
 
 ### 数学背景
 #### 回归
-用一条直线对已知的数据点进行拟合
+用一条直线对已知的数据点进行拟合  
+
 #### Sigmoid函数
 - 公式：
 $$\sigma(z)=\frac{1}{1+e^{-z}}$$
@@ -68,7 +69,7 @@ $$z=w^{T} x$$
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-#解析数据
+    #解析数据
 def loadDataSet(file_name):
     # dataMat为原始数据， labelMat为原始数据的标签
     dataMat = []
@@ -84,14 +85,14 @@ def loadDataSet(file_name):
         labelMat.append(int(lineArr[2]))
     return dataMat, labelMat
 
-#sigmoid跳跃函数
+    #sigmoid跳跃函数
 def sigmoid(inX):
     # return 1.0 / (1 + exp(-inX))
 
     # Tanh是Sigmoid的变形，与 sigmoid 不同的是，tanh 是0均值的。因此，实际应用中，tanh 会比 sigmoid 更好。
     return 2 * 1.0/(1+np.exp(-2*inX)) - 1
 
-#随机梯度下降算法（随机化）
+    #随机梯度下降算法（随机化）
 def stocGradAscent(dataMatrix, classLabels, numIter=150):
     '''
     Desc:
@@ -125,7 +126,7 @@ def stocGradAscent(dataMatrix, classLabels, numIter=150):
             del (dataIndex[randIndex])
     return weights
 
-#可视化展示
+    #可视化展示
 def plotBestFit(dataArr, labelMat, weights):
     '''
         Desc:
