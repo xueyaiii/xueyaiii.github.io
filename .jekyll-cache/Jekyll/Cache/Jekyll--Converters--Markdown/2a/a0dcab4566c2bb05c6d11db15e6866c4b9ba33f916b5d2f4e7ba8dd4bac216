@@ -1,4 +1,4 @@
-I"�L<head>
+I"bL<head>
     <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
     <script type="text/x-mathjax-config">
         MathJax.Hub.Config({
@@ -63,10 +63,9 @@
 测试算法</p>
 <h2 id="实例">实例</h2>
 <h3 id="算法">算法</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="c1"># 解析数据
+    <span class="c1">#解析数据
 </span><span class="k">def</span> <span class="nf">loadDataSet</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
     <span class="c1"># dataMat为原始数据， labelMat为原始数据的标签
 </span>    <span class="n">dataMat</span> <span class="o">=</span> <span class="p">[]</span>
@@ -82,7 +81,7 @@
         <span class="n">labelMat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lineArr</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
     <span class="k">return</span> <span class="n">dataMat</span><span class="p">,</span> <span class="n">labelMat</span>
 
-<span class="c1"># sigmoid跳跃函数
+<span class="c1">#sigmoid跳跃函数
 </span><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">inX</span><span class="p">):</span>
     <span class="c1"># return 1.0 / (1 + exp(-inX))
 </span>
@@ -187,7 +186,6 @@
 <p>Windows10+Anaconda Spyder（Python 3.5)</p>
 <h3 id="运行结果">运行结果</h3>
 <ul>
-  <li><img src="/image/Logistic回归.PNG" alt="运行结果" /></li>
-  <li><img src="/image/PCA_sklearn2.PNG" alt="测试集" /></li>
+  <li><img src="/image/Logistic.PNG" alt="运行结果" /></li>
 </ul>
 :ET

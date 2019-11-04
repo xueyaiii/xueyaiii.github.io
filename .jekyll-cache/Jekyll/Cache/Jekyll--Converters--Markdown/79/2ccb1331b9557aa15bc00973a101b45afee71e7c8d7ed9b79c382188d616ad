@@ -1,4 +1,4 @@
-I"XL<head>
+I"`L<head>
     <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
     <script type="text/x-mathjax-config">
         MathJax.Hub.Config({
@@ -63,8 +63,7 @@
 测试算法</p>
 <h2 id="实例">实例</h2>
 <h3 id="算法">算法</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="c1"># 解析数据
 </span><span class="k">def</span> <span class="nf">loadDataSet</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
@@ -186,5 +185,7 @@
 <h3 id="运行环境">运行环境</h3>
 <p>Windows10+Anaconda Spyder（Python 3.5)</p>
 <h3 id="运行结果">运行结果</h3>
-<p><img src="/image/Logistic回归.PNG" alt="运行结果" /></p>
+<ul>
+  <li><img src="/image/Logistic.PNG" alt="运行结果" /></li>
+</ul>
 :ET
