@@ -32,19 +32,22 @@ author: xueyaiii
 - 公式：
 $$\sigma(z)=\frac{1}{1+e^{-z}}$$
 - $z$为0时，$\sigma(z)$为0.5，$z$为$+\infty$，$\sigma(z)$为1，$z$为$-\infty$，$\sigma(z)$为0
-- 如果横坐标刻度足够大，Sigmoid函数就像一个阶跃函数，可以达到分类的目的
+- 如果横坐标刻度足够大，Sigmoid函数就像一个阶跃函数，可以达到分类的目的  
+
 #### 引入Logistic分类器
 - 在每个特征$x_{i}$上乘上一个回归系数$w_{i}$,相加得到$z$(**拟合**)，将$z$代入Sigmoid函数，任何大于 0.5 的数据被分入 1 类，小于 0.5 即被归入 0 类
 $$z=w_{0} x_{0}+w_{1} x_{1}+w_{2} x_{2}+\ldots+w_{n} x_{n}$$
 即：
 $$z=w^{T} x$$
-- 我们现在的目标是求解这些回归系数$w_{i}$
+- 我们现在的目标是求解这些回归系数$w_{i}$  
+
 #### 基于梯度上升法确定回归系数（拟合）
 - 设样本的类别标签为$y$，回归系数为$w$，样本矩阵为$x$，误差为$e$，步长为$alpha$。
 - 我们的目标是最小化误差$e^{T} e$(因为是列向量)反过来就是最大化$-e^{T} e$，为消去因子，此处最大化$-\frac{1}{2} e^{T} e$
 - $-\frac{1}{2} e^{T} e=-\frac{1}{2}(x w-y)^{T}(x w-y)=f(w)$拆开来就是：$f(w)=-\frac{1}{2}\left(w^{T} x^{T}-y\right)(x w-y)=-\frac{1}{2}\left(w^{T} x^{T} x w-w^{T} x^{T} y-y^{T} x w+y^{T} y\right)$
 - 到这就可以用梯度上升算法，对求导可以得出$\frac{\partial f(w)}{\partial w}=x^{T} y-x^{T} x w=x^{T}(y-w x)=x^{T} e$
-- 更新回归系数的公式就是：$w=w+\alpha x^{T} e$
+- 更新回归系数的公式就是：$w=w+\alpha x^{T} e$  
+
 ### Logistic 算法过程
 #### Logistic 回归算法
 ```
@@ -63,9 +66,9 @@ $$z=w^{T} x$$
 ## 实例
 ### 算法
 ```python
+
 import numpy as np
 import matplotlib.pyplot as plt
-
 # 解析数据
 def loadDataSet(file_name):
     # dataMat为原始数据， labelMat为原始数据的标签
@@ -82,14 +85,12 @@ def loadDataSet(file_name):
         labelMat.append(int(lineArr[2]))
     return dataMat, labelMat
 
-
 # sigmoid跳跃函数
 def sigmoid(inX):
     # return 1.0 / (1 + exp(-inX))
 
     # Tanh是Sigmoid的变形，与 sigmoid 不同的是，tanh 是0均值的。因此，实际应用中，tanh 会比 sigmoid 更好。
     return 2 * 1.0/(1+np.exp(-2*inX)) - 1
-
 
 # 随机梯度下降算法（随机化）
 def stocGradAscent(dataMatrix, classLabels, numIter=150):
@@ -124,7 +125,6 @@ def stocGradAscent(dataMatrix, classLabels, numIter=150):
             weights = weights + alpha * error * dataMatrix[dataIndex[randIndex]]
             del (dataIndex[randIndex])
     return weights
-
 
 # 可视化展示
 def plotBestFit(dataArr, labelMat, weights):
@@ -189,4 +189,4 @@ if __name__ == "__main__":
 ### 运行环境
 Windows10+Anaconda Spyder（Python 3.5)
 ### 运行结果
-![运行结果](/image/Logistic回归.PNG)
+- ![运行结果](/image/Logistic.PNG)
