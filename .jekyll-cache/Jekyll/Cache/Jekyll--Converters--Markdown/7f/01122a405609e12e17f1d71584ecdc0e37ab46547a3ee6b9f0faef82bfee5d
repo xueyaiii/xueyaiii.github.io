@@ -1,0 +1,10 @@
+I"�
+<h2 id="anaconda-安装package提示packagesnotfounderror">Anaconda 安装package提示PackagesNotFoundError</h2>
+<h2 id="解决方法">解决方法</h2>
+<ul>
+  <li>conda install watermark 提示PackagesNotFoundError: The following packages are not available from current channels</li>
+  <li>输入 ：anaconda search -t conda watermark</li>
+  <li>输入： anaconda show conda-forge/watermark</li>
+  <li>根据提示命令安装</li>
+</ul>
+:ET
